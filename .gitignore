@@ -1,4 +1,55 @@
-# Visual Studio
+# -----------------------------------------
+# 1. Visual Studio (Carpetas y Archivos temporales)
+# -----------------------------------------
 .vs/
-bin/
-obj/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# -----------------------------------------
+# 2. Resultados de compilación (Binarios)
+# -----------------------------------------
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# -----------------------------------------
+# 3. Archivos de publicación (Para Inno Setup)
+# -----------------------------------------
+Publish/
+*.pubxml
+*.publishproj
+
+# -----------------------------------------
+# 4. Otros archivos de sistema
+# -----------------------------------------
+# Archivos de base de datos locales (si usas SQL LocalDB)
+*.mdf
+*.ldf
+
+# Archivos de backup de Visual Studio
+*.bak
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# -----------------------------------------
+# 5. Paquetes NuGet
+# -----------------------------------------
+# Los paquetes se restauran solo, no hace falta subirlos
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
