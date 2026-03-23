@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "settAPI", "..\backend\settAPI\settAPI.csproj", "{CB24C096-217D-4299-9B61-A45A6604CFBA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "settAGENT", "..\desktop-service\settAGENT\settAGENT.csproj", "{D18B3403-434B-46C9-8BCA-598D9C477F9F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{CB24C096-217D-4299-9B61-A45A6604CFBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CB24C096-217D-4299-9B61-A45A6604CFBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CB24C096-217D-4299-9B61-A45A6604CFBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D18B3403-434B-46C9-8BCA-598D9C477F9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D18B3403-434B-46C9-8BCA-598D9C477F9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D18B3403-434B-46C9-8BCA-598D9C477F9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D18B3403-434B-46C9-8BCA-598D9C477F9F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
