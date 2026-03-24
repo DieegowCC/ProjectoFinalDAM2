@@ -12,6 +12,6 @@ Aplicación destinada al control de las acciones del trabajador/estudiante. Los 
 
 ## Authors
 
-[![Contribuidores](https://contrib.rocks/image?repo=DieegowCC/ProjectoFinalDAM2)](https://github.com/DieegowCC/ProjectoFinalDAM2/graphs/contributors)
+[![Contribuidores](https://contrib.rocks/image?repo=DieegowCC/ProjectoFinalDAM2&max=3&columns=3)](https://github.com/DieegowCC/ProjectoFinalDAM2/graphs/contributors)
 
 
