@@ -1,11 +1,12 @@
 ﻿namespace settAPI.Classes
 {
-    // SEGUIR AQUÍ, https://claude.ai/share/821499d1-f429-4cc5-b1f0-103654bf7824 (LINK CLAUDE CONVERSACIÓN)
     public class WorkSession
     {
+        public int id {  get; set; }
         public int worker_id { get; set; }
+        public Worker Worker { get; set; } = null!;
         public DateTime started_at { get; set; }
-        public DateTime ended_at { get; set; }
-        public int total_minutes { get; set; }
+        public DateTime? ended_at{ get; set; }
+        public int? total_minutes { get; set; }
     }
 }
