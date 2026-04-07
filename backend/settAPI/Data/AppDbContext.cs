@@ -19,6 +19,12 @@ namespace settAPI.Data
         {
             // Aquí va el mapeo a los nombres de las tablas
 
+            modelBuilder.Entity<ActivityPeriod>().ToTable("activity_periods");
+            modelBuilder.Entity<Admin>().ToTable("admins");
+            modelBuilder.Entity<AppActivity>().ToTable("app_activity");
+            modelBuilder.Entity<Application>().ToTable("applications");
+            modelBuilder.Entity<Worker>().ToTable("workers");
+            modelBuilder.Entity<WorkSession>().ToTable("work_session");
 
         }
     }
