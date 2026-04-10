@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using settAPI.Data;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);     // Configura los servicios y el pipeline de la aplicación
-                                                                        // (https://learn.microsoft.com/en-us/aspnet/core/fundamentals/startup)
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);      // Configura los servicios y el pipeline de la aplicación
+                                                                         // (https://learn.microsoft.com/en-us/aspnet/core/fundamentals/startup)
 builder.Services.AddControllers();                                       // Añade soporte para controladores MVC (endpoints de la API)
                                                                          // (https://learn.microsoft.com/en-us/aspnet/core/web-api)
 builder.Services.AddEndpointsApiExplorer();                              // Necesario para que Swagger descubra los endpoints automáticamente
