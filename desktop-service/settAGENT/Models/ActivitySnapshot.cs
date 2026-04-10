@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace settAGENT.Models
 {
     // Los campos de los nombres son PROVISIONALES
-    internal class ActivitySnapshot
+    public class ActivitySnapshot
     {
         // Sistema
         public string MacAddress { get; set; } = string.Empty;

@@ -1,5 +1,6 @@
 using settAGENT.Collectors;
 using settAGENT.Models;
+using settAGENT.Services;
 
 namespace settAGENT
 {
@@ -10,12 +11,14 @@ namespace settAGENT
         private readonly string _macAddress;
         private readonly string _hostname;
         private readonly string _windowsUsername;
+        private readonly ApiSenderService _apiSender;
 
         private static readonly TimeSpan CollectionInterval = TimeSpan.FromSeconds(10);
 
-        public Worker(ILogger<Worker> logger)
+        public Worker(ILogger<Worker> logger, ApiSenderService apiSender)
         {
             _logger = logger;
+            _apiSender = apiSender;
             _macAddress = SystemInfoCollector.GetMacAddress();
             _hostname = SystemInfoCollector.GetHostname();
             _windowsUsername = SystemInfoCollector.GetWindowsUsername();
@@ -38,6 +41,8 @@ namespace settAGENT
                         snapshot.ActiveProcessName,
                         snapshot.ActiveWindowTitle
                     );
+
+                    await _apiSender.SendAsync(snapshot, stoppingToken);
                 }
                 catch (Exception ex)
                 {

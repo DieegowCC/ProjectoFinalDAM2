@@ -1,4 +1,5 @@
 using Serilog;
+using settAGENT.Services;
 namespace settAGENT
 {
     public class Program
@@ -37,6 +38,7 @@ namespace settAGENT
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddHostedService<Worker>();
+                    services.AddSingleton<ApiSenderService>();
                 });
     }
 }
