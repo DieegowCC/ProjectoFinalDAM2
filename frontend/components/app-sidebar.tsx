@@ -98,18 +98,18 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar {...props}>
-      <SidebarHeader>
+    <Sidebar className="bg-[#1a1a1a] border-r border-[#2e2e2e]" {...props}>
+      <SidebarHeader className="border-b border-[#2e2e2e]">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <House   className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gray-600 text-white">
+                  <House className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-medium">Sett</span>
-                  <span className="">v0.0.1</span>
+                  <span className="font-medium text-white">Sett</span>
+                  <span className="text-gray-400 text-xs">v0.0.1</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -128,22 +128,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton>
-                      {item.title}{" "}
-                      <PlusIcon className="ml-auto group-data-[state=open]/collapsible:hidden" />
-                      <MinusIcon className="ml-auto group-data-[state=closed]/collapsible:hidden" />
+                    <SidebarMenuButton className="text-gray-300 hover:bg-gray-700 hover:text-white data-[state=open]:text-white">
+                      {item.title}
+                      <PlusIcon className="ml-auto group-data-[state=open]/collapsible:hidden text-gray-500" />
+                      <MinusIcon className="ml-auto group-data-[state=closed]/collapsible:hidden text-gray-500" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   {item.items?.length ? (
                     <CollapsibleContent>
-                      <SidebarMenuSub>
-                        {item.items.map((item) => (
-                          <SidebarMenuSubItem key={item.title}>
+                      <SidebarMenuSub className="border-l border-gray-700">
+                        {item.items.map((subItem) => (
+                          <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton
                               asChild
-                              isActive={item.isActive}
+                              isActive={subItem.isActive}
+                              className="text-gray-400 hover:text-white hover:bg-gray-700 data-[active=true]:text-white data-[active=true]:bg-gray-600"
                             >
-                              <a href={item.url}>{item.title}</a>
+                              <a href={subItem.url}>{subItem.title}</a>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}
@@ -156,7 +157,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarRail />
+      <SidebarRail className="bg-[#1a1a1a] hover:bg-[#2a2a2a]" />
     </Sidebar>
   )
 }
