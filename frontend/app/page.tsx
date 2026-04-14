@@ -22,7 +22,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Monitor, User } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Monitor, User, LogIn } from "lucide-react"
+import Link from "next/link"
 
 interface ActiveUser {
   id: string
@@ -127,6 +129,19 @@ export default function Home({
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+
+          {/* Botón login */}
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="ml-auto border-gray-600 text-white hover:bg-gray-700 hover:text-white bg-transparent"
+          >
+            <Link href="/login">
+              <LogIn className="size-4" />
+              Login
+            </Link>
+          </Button>
         </header>
 
         <div className="flex flex-1 flex-col gap-6 p-6">
@@ -159,7 +174,7 @@ export default function Home({
             {/* Tabla de trabajadores activos */}
             <Card className="lg:col-span-2 bg-gray-800 border-gray-700">
               <CardHeader>
-                <CardTitle className="text-base text-white ">
+                <CardTitle className="text-base text-white">
                   Trabajadores activos
                 </CardTitle>
               </CardHeader>
