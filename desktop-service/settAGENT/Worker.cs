@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using settAGENT.Collectors;
 using settAGENT.Models;
 using settAGENT.Services;
@@ -7,18 +8,21 @@ namespace settAGENT
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
+        private readonly ApiSenderService _apiSender;
+        private readonly AgentSettings _settings;
 
         private readonly string _macAddress;
         private readonly string _hostname;
         private readonly string _windowsUsername;
-        private readonly ApiSenderService _apiSender;
 
         private static readonly TimeSpan CollectionInterval = TimeSpan.FromSeconds(10);
 
-        public Worker(ILogger<Worker> logger, ApiSenderService apiSender)
+        public Worker(ILogger<Worker> logger, ApiSenderService apiSender, IOptions<AgentSettings> settings)
         {
             _logger = logger;
             _apiSender = apiSender;
+            _settings = settings.Value;
+
             _macAddress = SystemInfoCollector.GetMacAddress();
             _hostname = SystemInfoCollector.GetHostname();
             _windowsUsername = SystemInfoCollector.GetWindowsUsername();
@@ -28,6 +32,8 @@ namespace settAGENT
         {
             _logger.LogInformation("Agente iniciado. MAC: {Mac} | Host: {Host} | User: {User}",
                 _macAddress, _hostname, _windowsUsername);
+
+            TimeSpan interval = TimeSpan.FromSeconds(_settings.CollectionIntervalSeconds);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -64,7 +70,7 @@ namespace settAGENT
                 WindowsUsername = _windowsUsername,
                 ActiveWindowTitle = windowTitle,
                 ActiveProcessName = processName,
-                IsUserActive = ActivityCollector.IsUserActive(),
+                IsUserActive = ActivityCollector.IsUserActive(_settings.InactivityThresholdMinutes),
                 CapturedAt = DateTime.UtcNow
             };
         }
