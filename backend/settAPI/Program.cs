@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using settAPI.Data;
 using settAPI.Hubs;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);      
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();                                       
 builder.Services.AddEndpointsApiExplorer();
