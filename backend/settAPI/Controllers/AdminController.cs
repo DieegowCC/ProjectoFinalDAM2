@@ -39,12 +39,14 @@ public class AdminController : ControllerBase
     }
 
     // POST: api/admin
+    [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> CreateAdmin([FromBody] Admin admin)
     {
         try
         {
             admin.created_at = DateTime.UtcNow;
+            admin.password_hash = BCrypt.Net.BCrypt.HashPassword(admin.password_hash); // hashea la contraseña antes de guardarla
             await _context.Admins.AddAsync(admin);
             await _context.SaveChangesAsync();
 

@@ -29,7 +29,7 @@ public class AuthController : ControllerBase
         Admin? admin = await _context.Admins
             .FirstOrDefaultAsync(a => a.username == request.Username);
 
-        if (admin == null || admin.password_hash != request.Password)        // contraseña en texto plano de momento, se hasheará más adelante
+        if (admin == null || !BCrypt.Net.BCrypt.Verify(request.Password, admin.password_hash))
             return Unauthorized(new { error = "Credenciales incorrectas" });
 
         string token = GenerarToken(admin);
