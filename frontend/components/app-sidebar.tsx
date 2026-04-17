@@ -29,16 +29,6 @@ const data = {
     {
       title: "Home",
       url: "#",
-      items: [
-        {
-          title: "Installation",
-          url: "#",
-        },
-        {
-          title: "Project Structure",
-          url: "#",
-        },
-      ],
     },
     {
       title: "Settings",
@@ -46,29 +36,10 @@ const data = {
       items: [
         {
           title: "General",
-          url: "#",
-        },
-        {
-          title: "Profile Picture",
-          url: "#",
-          isActive: true,
-        },
-        {
-          title: "Security",
-          url: "#",
+          href: "/settings",
         },
         {
           title: "Account",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "API Reference",
-      url: "#",
-      items: [
-        {
-          title: "Components",
           url: "#",
         },
       ],
@@ -109,7 +80,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-medium text-white">Sett</span>
-                  <span className="text-gray-400 text-xs">v0.0.1</span>
+                  <span className="text-gray-400 text-xs">v0.0.2</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -141,7 +112,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton
                               asChild
-                              isActive={subItem.isActive}
                               className="text-gray-400 hover:text-white hover:bg-gray-700 data-[active=true]:text-white data-[active=true]:bg-gray-600"
                             >
                               <a href={subItem.url}>{subItem.title}</a>

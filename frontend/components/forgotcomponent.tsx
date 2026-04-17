@@ -9,9 +9,8 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import Link from "next/link"
 
-export function LoginForm({
+export function ForgotComponent({
   className,
   ...props
 }: React.ComponentProps<"div">) {
@@ -20,48 +19,40 @@ export function LoginForm({
       <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
           <CardTitle className="text-white">
-            Login to your account
+            Recupera tu contraseña
           </CardTitle>
           <CardDescription className="text-gray-400">
-            Enter your user below to login to your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="user" className="text-gray-300">
-                User
+              <Label htmlFor="password" className="text-gray-300">
+                Nueva contraseña
               </Label>
               <Input
-                id="user"
-                type="user"
+                id="NewPassword"
+                type="password"
                 required
                 className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-500 focus:border-gray-400 focus:ring-gray-400"
               />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="password" className="text-gray-300">
-                Password
+                Repetir Contraseña
               </Label>
               <Input
-                id="password"
+                id="NewPassword2"
                 type="password"
                 required
                 className="bg-gray-700 border-gray-600 text-white focus:border-gray-400 focus:ring-gray-400"
               />
-              
-              <Link href= "/forgotpsswd"
-                className="text-sm text-gray-400 underline-offset-4 hover:underline hover:text-white transition-colors self-end">
-                Forgot your password?
-              </Link>
             </div>
             <Button
               type="submit"
               className="w-full bg-gray-600 text-white hover:bg-gray-500 border-0 transition-colors">
-                <Link href= "/page.tsx"
-                className="text-sm text-gray-400 underline-offset-4 hover:underline hover:text-white transition-colors self-end">
-                </Link>
-              Login
+
+              Cambiar contraseña
             </Button>
           </form>
         </CardContent>

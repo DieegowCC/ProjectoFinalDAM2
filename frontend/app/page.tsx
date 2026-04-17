@@ -1,3 +1,7 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import * as signalR from "@microsoft/signalr"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
   Breadcrumb,
@@ -46,10 +50,12 @@ interface ChartData {
 }
 
 interface DashboardPageProps {
-  stats?: DashboardStats
-  workers?: ActiveUser[]
-  charts?: ChartData
+  initialStats?: DashboardStats
+  initialWorkers?: ActiveUser[]
+  initialCharts?: ChartData
 }
+
+const HUB_URL = "http://192.168.111.100:5432/MonitoringHub"
 
 function MetricCard({
   title,
@@ -97,17 +103,40 @@ function DonutChartPlaceholder({
 }
 
 export default function Home({
-  stats,
-  workers,
-  charts,
+  initialStats,
+  initialWorkers,
+  initialCharts,
 }: DashboardPageProps) {
+  const [stats, setStats] = useState<DashboardStats | undefined>(initialStats)
+  const [workers, setWorkers] = useState<ActiveUser[]>(initialWorkers ?? [])
+  const [charts, setCharts] = useState<ChartData | undefined>(initialCharts)
+  const [connected, setConnected] = useState(false)
+
+  useEffect(() => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl(HUB_URL)
+      .withAutomaticReconnect()
+      .configureLogging(signalR.LogLevel.Warning)
+      .build()
+
+    connection.on("UpdateStats", (data: DashboardStats) => setStats(data))
+    connection.on("UpdateWorkers", (data: ActiveUser[]) => setWorkers(data))
+    connection.on("UpdateCharts", (data: ChartData) => setCharts(data))
+
+    connection
+      .start()
+      .then(() => setConnected(true))
+      .catch((err) => console.error("SignalR error:", err))
+
+    return () => { connection.stop() }
+  }, [])
+
   return (
     <SidebarProvider
       style={{ fontFamily: "Verdana, Geneva, Tahoma, sans-serif" }}
     >
       <AppSidebar />
       <SidebarInset className="bg-gray-950">
-        {/* Header */}
         <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-800 px-4 bg-gray-900">
           <SidebarTrigger className="-ml-1 text-gray-300 hover:text-white hover:bg-gray-800" />
           <Separator
@@ -130,23 +159,22 @@ export default function Home({
             </BreadcrumbList>
           </Breadcrumb>
 
-          {/* Botón login */}
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="ml-auto border-gray-600 text-white hover:bg-gray-700 hover:text-white bg-transparent"
-          >
-            <Link href="/login">
-              <LogIn className="size-4" />
-              Login
-            </Link>
-          </Button>
+          <div className="ml-auto flex items-center gap-3">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="border-gray-600 text-white hover:bg-gray-700 hover:text-white bg-transparent"
+            >
+              <Link href="/login">
+                <LogIn className="size-4" />
+                Login
+              </Link>
+            </Button>
+          </div>
         </header>
 
         <div className="flex flex-1 flex-col gap-6 p-6">
-
-          {/* ── Fila de métricas ── */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <MetricCard
               title="Usuarios activos"
@@ -168,10 +196,7 @@ export default function Home({
             />
           </div>
 
-          {/* ── Fila inferior: tabla + charts ── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1">
-
-            {/* Tabla de trabajadores activos */}
             <Card className="lg:col-span-2 bg-gray-800 border-gray-700">
               <CardHeader>
                 <CardTitle className="text-base text-white">
@@ -189,35 +214,22 @@ export default function Home({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {workers && workers.length > 0 ? (
+                    {workers.length > 0 ? (
                       workers.map((worker) => (
-                        <TableRow
-                          key={worker.id}
-                          className="border-gray-700 hover:bg-gray-750"
-                        >
-                          <TableCell className="font-medium text-white">
-                            {worker.name}
-                          </TableCell>
-                          <TableCell>
-                            <StatusBadge status={worker.status} />
-                          </TableCell>
+                        <TableRow key={worker.id} className="border-gray-700 hover:bg-gray-750">
+                          <TableCell className="font-medium text-white">{worker.name}</TableCell>
+                          <TableCell><StatusBadge status={worker.status} /></TableCell>
                           <TableCell className="text-gray-300">
-                            {worker.activity !== null
-                              ? `${worker.activity}%`
-                              : "—"}
+                            {worker.activity !== null ? `${worker.activity}%` : "—"}
                           </TableCell>
-                          <TableCell className="text-gray-300">
-                            {worker.currentApp ?? "—"}
-                          </TableCell>
+                          <TableCell className="text-gray-300">{worker.currentApp ?? "—"}</TableCell>
                         </TableRow>
                       ))
                     ) : (
                       Array.from({ length: 5 }).map((_, i) => (
                         <TableRow key={i} className="border-gray-700">
                           <TableCell className="text-gray-600">—</TableCell>
-                          <TableCell />
-                          <TableCell />
-                          <TableCell />
+                          <TableCell /><TableCell /><TableCell />
                         </TableRow>
                       ))
                     )}
@@ -226,13 +238,10 @@ export default function Home({
               </CardContent>
             </Card>
 
-            {/* Panel lateral de charts */}
             <div className="flex flex-col gap-4">
               <Card className="flex-1 bg-gray-800 border-gray-700">
                 <CardHeader>
-                  <CardTitle className="text-base text-white">
-                    Actividad en tiempo real
-                  </CardTitle>
+                  <CardTitle className="text-base text-white">Actividad en tiempo real</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <DonutChartPlaceholder data={charts?.activityByStatus} />
@@ -241,9 +250,7 @@ export default function Home({
 
               <Card className="flex-1 bg-gray-800 border-gray-700">
                 <CardHeader>
-                  <CardTitle className="text-base text-white">
-                    Apps más usadas
-                  </CardTitle>
+                  <CardTitle className="text-base text-white">Apps más usadas</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <DonutChartPlaceholder data={charts?.topApps} />
@@ -251,7 +258,6 @@ export default function Home({
               </Card>
             </div>
           </div>
-
         </div>
       </SidebarInset>
     </SidebarProvider>
