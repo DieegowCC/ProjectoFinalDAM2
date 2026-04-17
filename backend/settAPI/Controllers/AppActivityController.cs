@@ -4,9 +4,11 @@ using settAPI.Classes;
 using settAPI.Data;
 using Microsoft.AspNetCore.SignalR;
 using settAPI.Hubs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace settAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class AppActivityController : ControllerBase

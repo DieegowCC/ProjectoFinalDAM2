@@ -5,9 +5,11 @@ using settAPI.Data;
 using Microsoft.AspNetCore.SignalR;
 using settAPI.Hubs;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 
 namespace settAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ActivityPeriodsController : ControllerBase
