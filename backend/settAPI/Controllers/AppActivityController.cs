@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using settAPI.Classes;
 using settAPI.Data;
+using Microsoft.AspNetCore.SignalR;
+using settAPI.Hubs;
 
 namespace settAPI.Controllers;
 
@@ -10,10 +12,12 @@ namespace settAPI.Controllers;
 public class AppActivityController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IHubContext<MonitoringHub> _hub;
 
-    public AppActivityController(AppDbContext context)
+    public AppActivityController(AppDbContext context, IHubContext<MonitoringHub> hub)
     {
         _context = context;
+        _hub = hub;
     }
 
     // GET: api/appactivity — devuelve toda la actividad
@@ -63,6 +67,8 @@ public class AppActivityController : ControllerBase
 
             await _context.AppActivities.AddAsync(activity);
             await _context.SaveChangesAsync();
+
+            await _hub.Clients.All.SendAsync("NuevaActividad", activity); // emite la actividad
 
             return Ok(new
             {

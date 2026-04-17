@@ -2,6 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using settAPI.Classes;
 using settAPI.Data;
+using Microsoft.AspNetCore.SignalR;
+using settAPI.Hubs;
+using System.Diagnostics;
 
 namespace settAPI.Controllers;
 
@@ -10,10 +13,12 @@ namespace settAPI.Controllers;
 public class ActivityPeriodsController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IHubContext<MonitoringHub> _hub;
 
-    public ActivityPeriodsController(AppDbContext context)
+    public ActivityPeriodsController(AppDbContext context, IHubContext<MonitoringHub> hub)
     {
         _context = context;
+        _hub = hub;
     }
 
     // GET: api/activityperiods — devuelve todos los periodos
@@ -60,6 +65,8 @@ public class ActivityPeriodsController : ControllerBase
 
             await _context.ActivityPeriods.AddAsync(period);
             await _context.SaveChangesAsync();
+
+            await _hub.Clients.All.SendAsync("NuevoPeriodo", period); // emite la actividad a todos los clientes del dashboard conectados por WebSocket
 
             return Ok(new
             {
