@@ -23,7 +23,7 @@ namespace settAGENT.Services
         {
             var body = new { worker_id = workerId };
             var response = await PostAsync("api/worksessions", body, ct);
-            return response?["session"]?["id"]?.GetValue<int>();
+            return response?.GetProperty("session").GetProperty("id").GetInt32();
         }
 
         public async Task CloseSessionAsync(int sessionId, CancellationToken ct)
@@ -36,7 +36,7 @@ namespace settAGENT.Services
         {
             var body = new { session_id = sessionId, applications_id = applicationId, is_foreground = true };
             var response = await PostAsync("api/appactivity", body, ct);
-            return response?["activity"]?["id"]?.GetValue<int>();
+            return response?.GetProperty("activity").GetProperty("id").GetInt32();
         }
 
         public async Task CloseAppActivityAsync(int activityId, CancellationToken ct)
@@ -49,7 +49,7 @@ namespace settAGENT.Services
         {
             var body = new { session_id = sessionId, status };
             var response = await PostAsync("api/activityperiods", body, ct);
-            return response?["period"]?["id"]?.GetValue<int>();
+            return response?.GetProperty("period").GetProperty("id").GetInt32();
         }
 
         public async Task CloseActivityPeriodAsync(int periodId, CancellationToken ct)
@@ -77,7 +77,7 @@ namespace settAGENT.Services
             // Si no existe, la crea
             var body = new { process_name = processName, display_name = windowTitle };
             var response = await PostAsync("api/applications", body, ct);
-            return response?["application"]?["id"]?.GetValue<int>();
+            return response?.GetProperty("application").GetProperty("id").GetInt32();
         }
 
         // --- Helpers privados ---
