@@ -1,3 +1,4 @@
+'use client'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,11 +11,30 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const router = useRouter()
+
+  const [user, setUser] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (user === 'admin' && password === 'admin') {
+      localStorage.setItem('auth', 'true')
+      router.push('/dashboard')
+    } else {
+      setError('Credenciales incorrectas')
+    }
+  }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="bg-gray-800 border-gray-700">
@@ -27,7 +47,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="user" className="text-gray-300">
                 User
@@ -35,6 +55,8 @@ export function LoginForm({
               <Input
                 id="user"
                 type="user"
+                value={user}
+                onChange={(e) => setUser(e.target.value)}
                 required
                 className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-500 focus:border-gray-400 focus:ring-gray-400"
               />
@@ -46,21 +68,21 @@ export function LoginForm({
               <Input
                 id="password"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 className="bg-gray-700 border-gray-600 text-white focus:border-gray-400 focus:ring-gray-400"
               />
               
-              <Link href= "/forgotpsswd"
+              <Link href= "/forgot"
                 className="text-sm text-gray-400 underline-offset-4 hover:underline hover:text-white transition-colors self-end">
                 Forgot your password?
-              </Link>
+              </Link> 
             </div>
+            {error && <p className="text-red-400 text-sm">{error}</p>}
             <Button
               type="submit"
               className="w-full bg-gray-600 text-white hover:bg-gray-500 border-0 transition-colors">
-                <Link href= "/page.tsx"
-                className="text-sm text-gray-400 underline-offset-4 hover:underline hover:text-white transition-colors self-end">
-                </Link>
               Login
             </Button>
           </form>
