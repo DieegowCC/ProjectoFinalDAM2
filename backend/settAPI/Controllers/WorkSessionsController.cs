@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using settAPI.Classes;
 using settAPI.Data;
+using Microsoft.AspNetCore.SignalR;
+using settAPI.Hubs;
 
 namespace settAPI.Controllers;
 
@@ -12,10 +14,12 @@ namespace settAPI.Controllers;
 public class WorkSessionsController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IHubContext<MonitoringHub> _hub;
 
-    public WorkSessionsController(AppDbContext context)
+    public WorkSessionsController(AppDbContext context, IHubContext<MonitoringHub> hub)
     {
         _context = context;
+        _hub = hub;
     }
 
     // GET: api/worksessions — devuelve todas las sesiones
@@ -62,6 +66,7 @@ public class WorkSessionsController : ControllerBase
 
             await _context.WorkSessions.AddAsync(session);
             await _context.SaveChangesAsync();
+            await _hub.Clients.All.SendAsync("SesionAbierta", session);   // notifica al dashboard que un worker ha iniciado sesión
 
             return Ok(new
             {
@@ -92,6 +97,7 @@ public class WorkSessionsController : ControllerBase
         session.total_minutes = (int)(session.ended_at.Value - session.started_at).TotalMinutes;
 
         await _context.SaveChangesAsync();
+        await _hub.Clients.All.SendAsync("SesionCerrada", session);   // notifica al dashboard que un worker ha cerrado sesión
 
         return Ok(new
         {
