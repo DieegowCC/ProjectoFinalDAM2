@@ -1,4 +1,5 @@
 using Serilog;
+using settAGENT.Models;
 using settAGENT.Services;
 namespace settAGENT
 {
@@ -37,8 +38,9 @@ namespace settAGENT
                 .UseSerilog()        // <--- IMPORTANTE: Le decimos al Host que use nuestro Log
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddHostedService<Worker>();
+                    services.Configure<AgentSettings>(hostContext.Configuration.GetSection("AgentSettings"));
                     services.AddSingleton<ApiSenderService>();
+                    services.AddHostedService<Worker>();
                 });
     }
 }
