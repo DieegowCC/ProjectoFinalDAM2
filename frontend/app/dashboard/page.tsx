@@ -161,20 +161,6 @@ export default function Home({
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-
-          <div className="ml-auto flex items-center gap-3">
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="border-gray-600 text-white hover:bg-gray-700 hover:text-white bg-transparent"
-            >
-              <Link href="/login">
-                <LogIn className="size-4" />
-                Login
-              </Link>
-            </Button>
-          </div>
         </header>
 
         <div className="flex flex-1 flex-col gap-6 p-6">
