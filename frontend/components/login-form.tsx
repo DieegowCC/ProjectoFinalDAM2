@@ -25,14 +25,24 @@ export function LoginForm({
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (user === 'admin' && password === 'admin') {
-      localStorage.setItem('auth', 'true')
+    setError('')
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user, password }),
+      })
+      if (!res.ok) {
+        setError('Credenciales incorrectas')
+        return
+      }
+      const data = await res.json()
+      localStorage.setItem('token', data.token)
       router.push('/dashboard')
-    } else {
-      setError('Credenciales incorrectas')
+    } catch {
+      setError('No se pudo conectar con el servidor')
     }
   }
   return (
