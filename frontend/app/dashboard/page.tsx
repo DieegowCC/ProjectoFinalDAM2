@@ -1,7 +1,5 @@
 "use client"
 
-import { redirect } from 'next/navigation'
-
 import { useEffect, useState } from "react"
 import * as signalR from "@microsoft/signalr"
 import { AppSidebar } from "@/components/app-sidebar"
@@ -57,7 +55,15 @@ interface DashboardPageProps {
   initialCharts?: ChartData
 }
 
-const HUB_URL = "http://192.168.111.100:5000/MonitoringHub"
+interface BackendWorker { id: number; name: string; is_active: boolean }
+interface BackendSession { id: number; worker_id: number; ended_at?: string | null }
+interface BackendActivity {
+  id: number
+  session_id: number
+  is_foreground: boolean
+  workSession?: { worker_id: number }
+  application?: { display_name?: string; process_name: string }
+}
 
 function MetricCard({
   title,
@@ -108,31 +114,78 @@ export default function Home({
   initialStats,
   initialWorkers,
   initialCharts,
-  // redirect('/login')  
 }: DashboardPageProps) {
+  const router = useRouter()
   const [stats, setStats] = useState<DashboardStats | undefined>(initialStats)
   const [workers, setWorkers] = useState<ActiveUser[]>(initialWorkers ?? [])
   const [charts, setCharts] = useState<ChartData | undefined>(initialCharts)
   const [connected, setConnected] = useState(false)
 
-  // useEffect(() => {
-  //   const connection = new signalR.HubConnectionBuilder()
-  //     .withUrl(HUB_URL)
-  //     .withAutomaticReconnect()
-  //     .configureLogging(signalR.LogLevel.Warning)
-  //     .build()
+  useEffect(() => {
+    if (!localStorage.getItem('token')) {
+      router.replace('/login')
+    }
+  }, [router])
 
-  //   connection.on("UpdateStats", (data: DashboardStats) => setStats(data))
-  //   connection.on("UpdateWorkers", (data: ActiveUser[]) => setWorkers(data))
-  //   connection.on("UpdateCharts", (data: ChartData) => setCharts(data))
+  // Carga inicial: workers + sesiones activas via REST
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+    const headers = { Authorization: `Bearer ${token}` }
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL
+    Promise.all([
+      fetch(`${apiUrl}/api/workers`, { headers }).then(r => r.json()),
+      fetch(`${apiUrl}/api/worksessions`, { headers }).then(r => r.json()),
+    ]).then(([workersData, sessionsData]: [BackendWorker[], BackendSession[]]) => {
+      const activeIds = new Set(sessionsData.filter(s => !s.ended_at).map(s => s.worker_id))
+      setWorkers(workersData.map(w => ({
+        id: w.id.toString(),
+        name: w.name,
+        status: activeIds.has(w.id) ? "Activo" as const : "Inactivo" as const,
+        activity: null,
+        currentApp: null,
+      })))
+    }).catch(err => console.error('Error cargando datos iniciales:', err))
+  }, [])
 
-  //   connection
-  //     .start()
-  //     .then(() => setConnected(true))
-  //     .catch((err) => console.error("SignalR error:", err))
+  // SignalR: actualizaciones en tiempo real
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) return
 
-  //   return () => { connection.stop() }
-  // }, [])
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl(`${process.env.NEXT_PUBLIC_API_URL}/hubs/monitoring`)
+      .withAutomaticReconnect()
+      .configureLogging(signalR.LogLevel.Warning)
+      .build()
+
+    connection.on("SesionAbierta", (session: BackendSession) => {
+      setWorkers(prev => prev.map(w =>
+        w.id === session.worker_id.toString() ? { ...w, status: "Activo" as const } : w
+      ))
+    })
+
+    connection.on("SesionCerrada", (session: BackendSession) => {
+      setWorkers(prev => prev.map(w =>
+        w.id === session.worker_id.toString() ? { ...w, status: "Inactivo" as const, currentApp: null } : w
+      ))
+    })
+
+    connection.on("NuevaActividad", (activity: BackendActivity) => {
+      if (!activity.is_foreground || !activity.workSession) return
+      const appName = activity.application?.display_name ?? activity.application?.process_name ?? null
+      setWorkers(prev => prev.map(w =>
+        w.id === activity.workSession!.worker_id.toString() ? { ...w, currentApp: appName } : w
+      ))
+    })
+
+    connection
+      .start()
+      .then(() => setConnected(true))
+      .catch(err => console.error('SignalR error:', err))
+
+    return () => { connection.stop() }
+  }, [])
 
   return (
     <SidebarProvider
