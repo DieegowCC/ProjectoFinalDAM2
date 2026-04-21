@@ -39,7 +39,6 @@ public class AdminController : ControllerBase
     }
 
     // POST: api/admin
-    [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> CreateAdmin([FromBody] Admin admin)
     {
@@ -76,7 +75,7 @@ public class AdminController : ControllerBase
             return NotFound(new { error = "Admin no encontrado", id });
 
         admin.username = adminActualizado.username;
-        admin.password_hash = adminActualizado.password_hash;
+        admin.password_hash = BCrypt.Net.BCrypt.HashPassword(adminActualizado.password_hash);
 
         await _context.SaveChangesAsync();
 

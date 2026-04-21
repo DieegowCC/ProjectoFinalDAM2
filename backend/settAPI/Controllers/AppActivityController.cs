@@ -70,6 +70,8 @@ public class AppActivityController : ControllerBase
             await _context.AppActivities.AddAsync(activity);
             await _context.SaveChangesAsync();
 
+            await _context.Entry(activity).Reference(a => a.WorkSession).LoadAsync();
+            await _context.Entry(activity).Reference(a => a.Application).LoadAsync();
             await _hub.Clients.All.SendAsync("NuevaActividad", activity); // emite la actividad
 
             return Ok(new
