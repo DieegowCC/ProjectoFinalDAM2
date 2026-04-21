@@ -33,8 +33,8 @@ app.UseAuthentication();    // debe ir siempre antes de UseAuthorization
 app.UseAuthorization();
 
 app.MapControllers();
-app.Run();
 app.MapHub<MonitoringHub>("/hubs/monitoring");   // expone el hub en esta URL para que el frontend se conecte
+app.Run();
 
 void ConfigurarBaseDatos(DbContextOptionsBuilder options)
 {
