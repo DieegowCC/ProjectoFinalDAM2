@@ -60,6 +60,7 @@ public class AppActivityController : ControllerBase
     }
 
     // POST: api/appactivity — registra una nueva actividad (el desktop la llama al cambiar de ventana)
+    [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> CreateActivity([FromBody] AppActivity activity)
     {
@@ -91,6 +92,7 @@ public class AppActivityController : ControllerBase
     }
 
     // PUT: api/appactivity/5/close — cierra una actividad cuando el worker cambia de ventana
+    [AllowAnonymous]
     [HttpPut("{id}/close")]
     public async Task<ActionResult> CloseActivity(int id)
     {

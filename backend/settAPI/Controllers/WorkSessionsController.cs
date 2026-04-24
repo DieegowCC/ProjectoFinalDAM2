@@ -57,6 +57,7 @@ public class WorkSessionsController : ControllerBase
     }
 
     // POST: api/worksessions — abre una nueva sesión (el desktop la llama al arrancar)
+    [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> OpenSession([FromBody] WorkSession session)
     {
@@ -85,6 +86,7 @@ public class WorkSessionsController : ControllerBase
     }
 
     // PUT: api/worksessions/5/close — cierra una sesión activa (el desktop la llama al apagarse)
+    [AllowAnonymous]
     [HttpPut("{id}/close")]
     public async Task<ActionResult> CloseSession(int id)
     {

@@ -58,6 +58,7 @@ public class ActivityPeriodsController : ControllerBase
     }
 
     // POST: api/activityperiods — registra un nuevo periodo (active, idle o break)
+    [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> CreatePeriod([FromBody] ActivityPeriod period)
     {
@@ -87,6 +88,7 @@ public class ActivityPeriodsController : ControllerBase
     }
 
     // PUT: api/activityperiods/5/close — cierra el periodo actual
+    [AllowAnonymous]
     [HttpPut("{id}/close")]
     public async Task<ActionResult> ClosePeriod(int id)
     {

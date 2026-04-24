@@ -19,6 +19,7 @@ public class ApplicationsController : ControllerBase
     }
 
     // GET: api/applications — devuelve todas las aplicaciones registradas
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult> GetApplications()
     {
@@ -39,6 +40,7 @@ public class ApplicationsController : ControllerBase
     }
 
     // POST: api/applications — registra una nueva aplicación detectada por el desktop
+    [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> CreateApplication([FromBody] Application application)
     {
