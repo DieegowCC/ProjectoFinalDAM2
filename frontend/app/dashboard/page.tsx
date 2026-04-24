@@ -179,6 +179,11 @@ export default function Home({
       ))
     })
 
+    connection.on("NuevoPeriodo", (period) => {
+      // por ahora solo lo logueamos, aquí se conectará cuando se muestre en el dashboard
+      console.log("NuevoPeriodo recibido:", period)
+    })
+
     connection
       .start()
       .then(() => setConnected(true))
