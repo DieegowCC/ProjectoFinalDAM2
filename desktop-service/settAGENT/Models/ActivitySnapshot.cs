@@ -6,13 +6,7 @@ using System.Threading.Tasks;
 
 namespace settAGENT.Models
 {
-    public class AgentSettings
-    {
-        public string ApiUrl { get; set; } = string.Empty;
-        public int WorkerId { get; set; } = 1;
-        public int CollectionIntervalSeconds { get; set; } = 10;
-        public int InactivityThresholdMinutes { get; set; } = 5;
-    }
+    
 
     // Los campos de los nombres son PROVISIONALES
     // Al final ya no usamos esto
