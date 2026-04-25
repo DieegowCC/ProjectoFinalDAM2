@@ -73,7 +73,32 @@ public class AppActivityController : ControllerBase
 
             await _context.Entry(activity).Reference(a => a.WorkSession).LoadAsync();
             await _context.Entry(activity).Reference(a => a.Application).LoadAsync();
-            await _hub.Clients.All.SendAsync("NuevaActividad", activity); // emite la actividad
+
+            object? workSessionData = null;
+            object? applicationData = null;
+
+            if (activity.WorkSession != null)
+            {
+                workSessionData = new { worker_id = activity.WorkSession.worker_id };
+            }
+
+            if (activity.Application != null)
+            {
+                applicationData = new
+                {
+                    display_name = activity.Application.display_name,
+                    process_name = activity.Application.process_name
+                };
+            }
+
+            await _hub.Clients.All.SendAsync("NuevaActividad", new
+            {
+                id = activity.id,
+                session_id = activity.session_id,
+                is_foreground = activity.is_foreground,
+                workSession = workSessionData,
+                application = applicationData
+            });
 
             return Ok(new
             {
