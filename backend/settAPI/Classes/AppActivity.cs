@@ -3,8 +3,8 @@
     public class AppActivity
     {
         public int id {  get; set; }
-        public int session_id { get; set; }         
-        public WorkSession WorkSession { get; set; } = null!;
+        public int session_id { get; set; }
+        public WorkSession? WorkSession { get; set; }
 
         public int? applications_id { get; set; }    
         public Application? Application { get; set; }

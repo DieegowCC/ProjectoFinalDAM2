@@ -4,7 +4,7 @@
     {
         public int id {  get; set; }
         public int worker_id { get; set; }
-        public Worker Worker { get; set; } = null!;
+        public Worker? Worker { get; set; }
         public DateTime started_at { get; set; }
         public DateTime? ended_at{ get; set; }
         public int? total_minutes { get; set; }
