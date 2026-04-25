@@ -70,7 +70,7 @@ namespace settAGENT.Services
                     a.TryGetProperty("process_name", out var p) &&
                     p.GetString() == processName);
 
-                if (existing.HasValue)
+                if (existing.HasValue && existing.Value.ValueKind == JsonValueKind.Object)
                     return existing.Value.GetProperty("id").GetInt32();
             }
 
