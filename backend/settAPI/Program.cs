@@ -41,6 +41,8 @@ AppDbContext dbContext = provider.GetRequiredService<AppDbContext>();   // obtie
 
 dbContext.Database.Migrate();   // crea las tablas si no existen y aplica las migraciones pendientes
 
+DbSeeder.Seed(dbContext);
+
 scope.Dispose();    // cierra el contenedor temporal que se había abierto antes para esta tarea
 
 app.Run();  // arranca la API (importante)
