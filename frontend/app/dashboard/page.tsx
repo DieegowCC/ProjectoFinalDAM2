@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import * as signalR from "@microsoft/signalr"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -153,11 +154,14 @@ export default function Home({
     const token = localStorage.getItem('token')
     if (!token) return
 
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${process.env.NEXT_PUBLIC_API_URL}/hubs/monitoring`)
-      .withAutomaticReconnect()
-      .configureLogging(signalR.LogLevel.Warning)
-      .build()
+  const connection = new signalR.HubConnectionBuilder()
+    .withUrl(`${process.env.NEXT_PUBLIC_API_URL}/hubs/monitoring`, {
+      skipNegotiation: true,
+      transport: signalR.HttpTransportType.WebSockets
+    })
+    .withAutomaticReconnect()
+    .configureLogging(signalR.LogLevel.Warning)
+    .build()
 
     connection.on("SesionAbierta", (session: BackendSession) => {
       setWorkers(prev => prev.map(w =>
@@ -183,6 +187,9 @@ export default function Home({
       // por ahora solo lo logueamos, aquí se conectará cuando se muestre en el dashboard
       console.log("NuevoPeriodo recibido:", period)
     })
+
+    connection.on("WorkerConnected", () => {}) // Handle vacio para silenciar el warning
+    connection.on("WorkerDisconnected", () => {})
 
     connection
       .start()

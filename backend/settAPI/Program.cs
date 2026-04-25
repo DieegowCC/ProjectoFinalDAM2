@@ -33,7 +33,7 @@ app.UseAuthentication();    // debe ir siempre antes de UseAuthorization
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<MonitoringHub>("/hubs/monitoring");   // expone el hub en esta URL para que el frontend se conecte
+app.MapHub<MonitoringHub>("/hubs/monitoring").AllowAnonymous();   // expone el hub en esta URL para que el frontend se conecte
 
 IServiceScope scope = app.Services.CreateScope();   // abre un "contenedor" de dependencias temporal
 IServiceProvider provider = scope.ServiceProvider;  // obtiene el contexto de la base de datos

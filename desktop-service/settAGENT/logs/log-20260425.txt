@@ -1,0 +1,7 @@
+2026-04-25 20:52:59 [INF] Iniciando el servicio del Agente...
+2026-04-25 20:53:00 [INF] Agente iniciado. MAC: 40C2BAF0B285 | Host: DESKTOP-M256929 | User: Dieegow
+2026-04-25 20:53:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-25 20:53:00 [INF] Hosting environment: Development
+2026-04-25 20:53:00 [INF] Content root path: C:\Users\Dieegow\Documents\GitHub\ProjectoFinalDAM2\desktop-service\settAGENT
+2026-04-25 20:53:00 [WRN] API respondió con error "BadRequest" en api/worksessions
+2026-04-25 20:53:00 [ERR] No se pudo abrir sesión con la API. Abortando.

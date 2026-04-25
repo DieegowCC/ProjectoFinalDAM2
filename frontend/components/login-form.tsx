@@ -64,7 +64,7 @@ export function LoginForm({
               </Label>
               <Input
                 id="user"
-                type="user"
+                type="text"
                 value={user}
                 onChange={(e) => setUser(e.target.value)}
                 required
