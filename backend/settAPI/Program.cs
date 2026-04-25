@@ -34,7 +34,16 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<MonitoringHub>("/hubs/monitoring");   // expone el hub en esta URL para que el frontend se conecte
-app.Run();
+
+IServiceScope scope = app.Services.CreateScope();   // abre un "contenedor" de dependencias temporal
+IServiceProvider provider = scope.ServiceProvider;  // obtiene el contexto de la base de datos
+AppDbContext dbContext = provider.GetRequiredService<AppDbContext>();   // obtiene la conexion a la base de datos
+
+dbContext.Database.Migrate();   // crea las tablas si no existen y aplica las migraciones pendientes
+
+scope.Dispose();    // cierra el contenedor temporal que se había abierto antes para esta tarea
+
+app.Run();  // arranca la API (importante)
 
 void ConfigurarBaseDatos(DbContextOptionsBuilder options)
 {
