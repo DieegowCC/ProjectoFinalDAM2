@@ -71,14 +71,34 @@ public class AppActivityController : ControllerBase
             await _context.AppActivities.AddAsync(activity);
             await _context.SaveChangesAsync();
 
-            await _context.Entry(activity).Reference(a => a.WorkSession).LoadAsync();
-            await _context.Entry(activity).Reference(a => a.Application).LoadAsync();
+            // Cargamos los datos relacionados directamente (las navigation properties
+            // no se llenan porque las FK con snake_case no siguen la convención de EF)
+            WorkSession? session = await _context.WorkSessions.FindAsync(activity.session_id);
+            Application? application = activity.applications_id.HasValue
+                ? await _context.Applications.FindAsync(activity.applications_id.Value)
+                : null;
 
+            // DTO plano para el frontend — evita problemas con entities de EF
+            var payload = new
+            {
+                id = activity.id,
+                session_id = activity.session_id,
+                is_foreground = activity.is_foreground,
+                workSession = session == null ? null : new { worker_id = session.worker_id },
+                application = application == null ? null : new
+                {
+                    display_name = application.display_name,
+                    process_name = application.process_name
+                }
+            };
+
+            await _hub.Clients.All.SendAsync("NuevaActividad", payload); // emite la actividad
+            
             object? workSessionData = null;
             object? applicationData = null;
 
             if (activity.WorkSession != null)
-            {
+            {   
                 workSessionData = new { worker_id = activity.WorkSession.worker_id };
             }
 
