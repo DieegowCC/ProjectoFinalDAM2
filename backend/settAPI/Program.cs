@@ -1,12 +1,14 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication;
-using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using settAPI.Data;
 using settAPI.Hubs;
-using Microsoft.OpenApi.Models;
+using System.Text;
+using System.Text.Json;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +17,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(ConfigurarSwagger);  // configura Swagger con soporte JWT
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR().AddJsonProtocol(ConfigurarSignalR); // Configurar SignalR para que use camelCase
 
 builder.Services.AddDbContext<AppDbContext>(ConfigurarBaseDatos);
 
@@ -114,4 +116,9 @@ void ConfigurarSwagger(Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions optio
 
     options.AddSecurityDefinition("Bearer", securityScheme);
     options.AddSecurityRequirement(securityRequirement);
+}
+
+void ConfigurarSignalR(JsonHubProtocolOptions options) // Configurar SignalR para que use camelCase
+{
+    options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 }
