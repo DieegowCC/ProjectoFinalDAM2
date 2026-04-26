@@ -176,7 +176,6 @@ export default function Home({
     })
 
     connection.on("NuevaActividad", (activity: BackendActivity) => {
-      console.log("NuevaActividad recibido:", activity)  // ← TEMPORAL para diagnosticar
       if (!activity.is_foreground || !activity.workSession) return
       const appName = activity.application?.display_name ?? activity.application?.process_name ?? null
       setWorkers(prev => prev.map(w =>
@@ -184,13 +183,11 @@ export default function Home({
       ))
     })
 
-    connection.on("NuevoPeriodo", (period: { status: string; workSession?: { worker_id: number } | null }) => {
-      if (!period.workSession) return
-      const nuevoEstado = period.status === "idle" ? "Ausente" as const : "Activo" as const
-      setWorkers(prev => prev.map(w =>
-        w.id === period.workSession!.worker_id.toString() ? { ...w, status: nuevoEstado } : w
-      ))
+    connection.on("NuevoPeriodo", (period) => {
+      // por ahora solo lo logueamos, aquí se conectará cuando se muestre en el dashboard
+      console.log("NuevoPeriodo recibido:", period)
     })
+
     connection.on("WorkerConnected", () => {}) // Handle vacio para silenciar el warning
     connection.on("WorkerDisconnected", () => {})
 
@@ -266,9 +263,7 @@ export default function Home({
                     <TableRow className="border-gray-700 hover:bg-gray-750">
                       <TableHead className="text-gray-400">Usuarios</TableHead>
                       <TableHead className="text-gray-400">Estado</TableHead>
-                      {/*
-                      PENDIENTE DE IMPLEMENTAR
-                      <TableHead className="text-gray-400">Actividad</TableHead>*/}
+                      <TableHead className="text-gray-400">Actividad</TableHead>
                       <TableHead className="text-gray-400">APP actual</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -278,9 +273,9 @@ export default function Home({
                         <TableRow key={worker.id} className="border-gray-700 hover:bg-gray-750">
                           <TableCell className="font-medium text-white">{worker.name}</TableCell>
                           <TableCell><StatusBadge status={worker.status} /></TableCell>
-                          {/*<TableCell className="text-gray-300">
+                          <TableCell className="text-gray-300">
                             {worker.activity !== null ? `${worker.activity}%` : "—"}
-                          </TableCell>*/}
+                          </TableCell>
                           <TableCell className="text-gray-300">{worker.currentApp ?? "—"}</TableCell>
                         </TableRow>
                       ))
