@@ -69,7 +69,21 @@ public class ActivityPeriodsController : ControllerBase
             await _context.ActivityPeriods.AddAsync(period);
             await _context.SaveChangesAsync();
 
-            await _hub.Clients.All.SendAsync("NuevoPeriodo", period); // emite la actividad a todos los clientes del dashboard conectados por WebSocket
+            // Cargamos la sesión directamente porque la navigation property WorkSession
+            // no se llena por el mismo problema de FK con snake_case que ya vimos antes
+            WorkSession? session = await _context.WorkSessions.FindAsync(period.session_id);
+
+            // DTO plano con solo lo que el frontend necesita
+            var payload = new
+            {
+                id = period.id,
+                session_id = period.session_id,
+                status = period.status,
+                // Si la sesión no existe (caso raro), mandamos null y el frontend lo ignorará
+                workSession = session == null ? null : new { worker_id = session.worker_id }
+            };
+
+            await _hub.Clients.All.SendAsync("NuevoPeriodo", payload);
 
             return Ok(new
             {
