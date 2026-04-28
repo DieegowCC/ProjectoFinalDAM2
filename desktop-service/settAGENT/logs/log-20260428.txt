@@ -1,0 +1,28 @@
+2026-04-28 09:04:17 [INF] Iniciando el servicio del Agente...
+2026-04-28 09:04:18 [INF] Agente iniciado. MAC: 00155D08EF05 | Host: PC15700 | User: Alumno
+2026-04-28 09:04:18 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-28 09:04:18 [INF] Hosting environment: Development
+2026-04-28 09:04:18 [INF] Content root path: C:\Users\Alumno\Documents\GitHub\ProjectoFinalDAM2\desktop-service\settAGENT
+2026-04-28 09:37:53 [INF] Iniciando el servicio del Agente...
+2026-04-28 09:37:54 [INF] Agente iniciado. MAC: 00155D08EF05 | Host: PC15700 | User: Alumno
+2026-04-28 09:37:54 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-28 09:37:54 [INF] Hosting environment: Development
+2026-04-28 09:37:54 [INF] Content root path: C:\Users\Alumno\Documents\GitHub\ProjectoFinalDAM2\desktop-service\settAGENT
+2026-04-28 09:37:56 [INF] Sesión abierta con ID: 1
+2026-04-28 09:37:56 [INF] Cambio de ventana: VsDebugConsole | 
+2026-04-28 09:38:16 [INF] Cambio de ventana: devenv | ProyectoFinalDAM2 (Ejecución) - Microsoft Visual Studio
+2026-04-28 09:38:26 [INF] Cambio de ventana: WindowsTerminal | C:\Users\Alumno\Documents\GitHub\ProjectoFinalDAM2\desktop-service\settAGENT\bin\Debug\net8.0\settAGENT.exe
+2026-04-28 09:38:46 [INF] Cambio de ventana: chrome | Sett. Vigilance App - Google Chrome
+2026-04-28 09:43:56 [INF] Cambio de estado: idle
+2026-04-28 09:46:19 [INF] Cambio de estado: active
+2026-04-28 09:52:01 [INF] Cambio de ventana: ShellHost | Configuración rápida
+2026-04-28 09:52:13 [INF] Cambio de ventana: chrome | Sett. Vigilance App - Google Chrome
+2026-04-28 09:53:33 [INF] Cambio de ventana: dbeaver | Dbeaver
+2026-04-28 09:54:25 [INF] Cambio de ventana: chrome | Solución de problemas técnicos - Claude - Google Chrome
+2026-04-28 09:54:35 [INF] Cambio de ventana: dbeaver | DBeaver 26.0.3 - workers
+2026-04-28 09:55:25 [INF] Cambio de ventana: chrome | Swagger UI - Google Chrome
+2026-04-28 09:55:45 [INF] Cambio de ventana: dbeaver | DBeaver 26.0.3 - workers
+2026-04-28 09:55:55 [INF] Cambio de ventana: chrome | Swagger UI - Google Chrome
+2026-04-28 09:58:55 [INF] Cambio de ventana: WindowsTerminal | Símbolo del sistema
+2026-04-28 09:59:17 [INF] Cambio de ventana: chrome | Swagger UI - Google Chrome
+2026-04-28 09:59:38 [INF] Cambio de ventana: devenv | ProyectoFinalDAM2 (Ejecución) - Microsoft Visual Studio
