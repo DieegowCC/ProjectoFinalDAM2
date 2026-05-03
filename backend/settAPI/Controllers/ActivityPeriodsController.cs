@@ -1,14 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using settAPI.Classes;
 using settAPI.Data;
 using Microsoft.AspNetCore.SignalR;
 using settAPI.Hubs;
-using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 
 namespace settAPI.Controllers;
 
+// Controlador de ActivityPeriods — los tramos de "estado del worker":
+// "active" (hay actividad de teclado/ratón) o "idle" (no hay actividad).
+//
+// El agente crea un periodo nuevo cada vez que cambia el estado del usuario, y
+// cierra el anterior. El dashboard usa el último periodo de cada sesión abierta
+// para decidir si un worker está "Activo" o "Ausente".
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
@@ -23,41 +28,10 @@ public class ActivityPeriodsController : ControllerBase
         _hub = hub;
     }
 
-    // GET: api/activityperiods — devuelve todos los periodos
-    [HttpGet]
-    public async Task<ActionResult> GetPeriods()
-    {
-        List<ActivityPeriod> periods = await _context.ActivityPeriods
-            .Include(p => p.WorkSession)
-            .ToListAsync();
-        return Ok(periods);
-    }
-
-    // GET: api/activityperiods/5 — devuelve un periodo por id
-    [HttpGet("{id}")]
-    public async Task<ActionResult> GetPeriod(int id)
-    {
-        ActivityPeriod? period = await _context.ActivityPeriods
-            .Include(p => p.WorkSession)
-            .FirstOrDefaultAsync(p => p.id == id);
-
-        if (period == null)
-            return NotFound(new { error = "Periodo no encontrado", id });
-
-        return Ok(period);
-    }
-
-    // GET: api/activityperiods/session/5 — devuelve todos los periodos de una sesión
-    [HttpGet("session/{sessionId}")]
-    public async Task<ActionResult> GetPeriodsBySession(int sessionId)
-    {
-        List<ActivityPeriod> periods = await _context.ActivityPeriods
-            .Where(p => p.session_id == sessionId)
-            .ToListAsync();
-        return Ok(periods);
-    }
-
-    // POST: api/activityperiods — registra un nuevo periodo (active, idle o break)
+    // POST /api/activityperiods
+    // El agente la llama al cambiar de estado, mandando { session_id, status }.
+    // status puede ser "active", "idle" o "break".
+    // [AllowAnonymous] porque el agente no maneja JWT.
     [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> CreatePeriod([FromBody] ActivityPeriod period)
@@ -69,17 +43,18 @@ public class ActivityPeriodsController : ControllerBase
             await _context.ActivityPeriods.AddAsync(period);
             await _context.SaveChangesAsync();
 
-            // Cargamos la sesión directamente porque la navigation property WorkSession
-            // no se llena por el mismo problema de FK con snake_case que ya vimos antes
+            // Cargamos la sesión a mano por el mismo motivo que en AppActivityController:
+            // las navigation properties con FK snake_case no se rellenan solas.
             WorkSession? session = await _context.WorkSessions.FindAsync(period.session_id);
 
-            // DTO plano con solo lo que el frontend necesita
+            // DTO plano con solo lo que el dashboard necesita para reaccionar
+            // (worker_id para saber qué fila refrescar; status para saber si pintar
+            //  Activo o Ausente).
             var payload = new
             {
                 id = period.id,
                 session_id = period.session_id,
                 status = period.status,
-                // Si la sesión no existe (caso raro), mandamos null y el frontend lo ignorará
                 workSession = session == null ? null : new { worker_id = session.worker_id }
             };
 
@@ -101,7 +76,8 @@ public class ActivityPeriodsController : ControllerBase
         }
     }
 
-    // PUT: api/activityperiods/5/close — cierra el periodo actual
+    // PUT /api/activityperiods/{id}/close
+    // Cierra el periodo actual cuando el agente detecta un cambio de estado.
     [AllowAnonymous]
     [HttpPut("{id}/close")]
     public async Task<ActionResult> ClosePeriod(int id)

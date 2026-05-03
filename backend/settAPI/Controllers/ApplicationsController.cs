@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using settAPI.Classes;
@@ -6,6 +6,13 @@ using settAPI.Data;
 
 namespace settAPI.Controllers;
 
+// Controlador de Applications — el catálogo de programas detectados (Chrome,
+// Visual Studio Code, etc.). Cada AppActivity referencia una entrada de aquí.
+//
+// Solo lo usa el agente:
+//   - GET para buscar si una app ya está registrada antes de crearla.
+//   - POST para registrarla si no existía.
+// El frontend nunca lo toca directamente — ve los nombres a través de /api/stats.
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
@@ -18,7 +25,10 @@ public class ApplicationsController : ControllerBase
         _context = context;
     }
 
-    // GET: api/applications — devuelve todas las aplicaciones registradas
+    // GET /api/applications
+    // Devuelve TODAS las apps registradas. El agente la usa al detectar una nueva
+    // ventana: primero comprueba si ya está en el catálogo y, si no, la crea.
+    // [AllowAnonymous] porque el agente no maneja JWT.
     [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult> GetApplications()
@@ -27,19 +37,9 @@ public class ApplicationsController : ControllerBase
         return Ok(applications);
     }
 
-    // GET: api/applications/5 — devuelve una aplicación por id
-    [HttpGet("{id}")]
-    public async Task<ActionResult> GetApplication(int id)
-    {
-        Application? application = await _context.Applications.FindAsync(id);
-
-        if (application == null)
-            return NotFound(new { error = "Aplicación no encontrada", id });
-
-        return Ok(application);
-    }
-
-    // POST: api/applications — registra una nueva aplicación detectada por el desktop
+    // POST /api/applications
+    // El agente la llama cuando detecta una app que no estaba en el catálogo.
+    // Manda { process_name, display_name }.
     [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> CreateApplication([FromBody] Application application)
@@ -63,46 +63,5 @@ public class ApplicationsController : ControllerBase
                 detalle = ex.Message
             });
         }
-    }
-
-    // PUT: api/applications/5 — actualiza los datos de una aplicación
-    [HttpPut("{id}")]
-    public async Task<ActionResult> UpdateApplication(int id, [FromBody] Application applicationActualizada)
-    {
-        Application? application = await _context.Applications.FindAsync(id);
-
-        if (application == null)
-            return NotFound(new { error = "Aplicación no encontrada", id });
-
-        application.process_name = applicationActualizada.process_name;
-        application.display_name = applicationActualizada.display_name;
-        application.category = applicationActualizada.category;
-
-        await _context.SaveChangesAsync();
-
-        return Ok(new
-        {
-            mensaje = "Aplicación actualizada correctamente",
-            application
-        });
-    }
-
-    // DELETE: api/applications/5 — elimina una aplicación del registro
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteApplication(int id)
-    {
-        Application? application = await _context.Applications.FindAsync(id);
-
-        if (application == null)
-            return NotFound(new { error = "Aplicación no encontrada", id });
-
-        _context.Applications.Remove(application);
-        await _context.SaveChangesAsync();
-
-        return Ok(new
-        {
-            mensaje = "Aplicación eliminada correctamente",
-            id
-        });
     }
 }

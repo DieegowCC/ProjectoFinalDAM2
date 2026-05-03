@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using settAPI.Classes;
 using settAPI.Data;
 using Microsoft.AspNetCore.SignalR;
@@ -8,6 +7,13 @@ using settAPI.Hubs;
 
 namespace settAPI.Controllers;
 
+// Controlador de WorkSessions (sesiones de trabajo).
+//
+// Una WorkSession representa un periodo entre que el agente arranca y se cierra
+// en un PC concreto. La crea y la cierra el agente; el dashboard solo la observa
+// a través de los eventos SignalR ("SesionAbierta" / "SesionCerrada") y de los
+// endpoints de /api/stats. Por eso este controlador solo expone POST y PUT close:
+// los GET listados y por id no los consume nadie.
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
@@ -22,41 +28,11 @@ public class WorkSessionsController : ControllerBase
         _hub = hub;
     }
 
-    // GET: api/worksessions — devuelve todas las sesiones
-    [HttpGet]
-    public async Task<ActionResult> GetSessions()
-    {
-        List<WorkSession> sessions = await _context.WorkSessions
-            .Include(s => s.Worker)
-            .ToListAsync();
-        return Ok(sessions);
-    }
-
-    // GET: api/worksessions/5 — devuelve una sesión por id
-    [HttpGet("{id}")]
-    public async Task<ActionResult> GetSession(int id)
-    {
-        WorkSession? session = await _context.WorkSessions
-            .Include(s => s.Worker)
-            .FirstOrDefaultAsync(s => s.id == id);
-
-        if (session == null)
-            return NotFound(new { error = "Sesión no encontrada", id });
-
-        return Ok(session);
-    }
-
-    // GET: api/worksessions/worker/5 — devuelve todas las sesiones de un worker
-    [HttpGet("worker/{workerId}")]
-    public async Task<ActionResult> GetSessionsByWorker(int workerId)
-    {
-        List<WorkSession> sessions = await _context.WorkSessions
-            .Where(s => s.worker_id == workerId)
-            .ToListAsync();
-        return Ok(sessions);
-    }
-
-    // POST: api/worksessions — abre una nueva sesión (el desktop la llama al arrancar)
+    // POST /api/worksessions
+    // El agente la llama al arrancar mandando { worker_id }.
+    // La API pone started_at = ahora (UTC), guarda y emite "SesionAbierta" por SignalR
+    // para que el dashboard refresque sus métricas.
+    // [AllowAnonymous] porque el agente no maneja JWT.
     [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> OpenSession([FromBody] WorkSession session)
@@ -67,7 +43,7 @@ public class WorkSessionsController : ControllerBase
 
             await _context.WorkSessions.AddAsync(session);
             await _context.SaveChangesAsync();
-            await _hub.Clients.All.SendAsync("SesionAbierta", session);   // notifica al dashboard que un worker ha iniciado sesión
+            await _hub.Clients.All.SendAsync("SesionAbierta", session);
 
             return Ok(new
             {
@@ -85,7 +61,10 @@ public class WorkSessionsController : ControllerBase
         }
     }
 
-    // PUT: api/worksessions/5/close — cierra una sesión activa (el desktop la llama al apagarse)
+    // PUT /api/worksessions/{id}/close
+    // El agente la llama al cerrarse (Ctrl+C, apagado, etc.).
+    // La API pone ended_at = ahora, calcula total_minutes y emite "SesionCerrada".
+    // [AllowAnonymous] por el mismo motivo que el POST.
     [AllowAnonymous]
     [HttpPut("{id}/close")]
     public async Task<ActionResult> CloseSession(int id)
@@ -99,7 +78,7 @@ public class WorkSessionsController : ControllerBase
         session.total_minutes = (int)(session.ended_at.Value - session.started_at).TotalMinutes;
 
         await _context.SaveChangesAsync();
-        await _hub.Clients.All.SendAsync("SesionCerrada", session);   // notifica al dashboard que un worker ha cerrado sesión
+        await _hub.Clients.All.SendAsync("SesionCerrada", session);
 
         return Ok(new
         {
