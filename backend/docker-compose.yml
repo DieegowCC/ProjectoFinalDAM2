@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     container_name: settapi_db
     environment:
       POSTGRES_DB: sett_db
@@ -9,7 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - settapi_pgdata:/var/lib/postgresql/data
+      - settapi_pgdata:/var/lib/postgresql
     restart: unless-stopped
 
 volumes:
