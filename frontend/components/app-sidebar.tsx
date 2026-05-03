@@ -1,79 +1,108 @@
-"use client"
+"use client";
 
-import * as React from "react"
-
-import { SearchForm } from "@/components/search-form"
+import * as React from "react";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { House, LogOut, Settings, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { House } from "lucide-react"
+} from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
-const data = {
-  navMain: [
-    {
-      title: "Home",
-      url: "/dashboard",
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-    },
-    {
-      title: "Architecture",
-      url: "#",
-    },
-    {
-      title: "Community",
-      url: "#",
-    },
-  ],
-}
+const navItems = [
+  { title: "Home", url: "/dashboard", icon: House },
+  { title: "Workers", url: "/workers", icon: Users },
+  { title: "Settings", url: "/settings", icon: Settings },
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.replace("/login");
+  };
+
   return (
-    <Sidebar className="bg-[#1a1a1a] border-r border-[#2e2e2e]" {...props}>
-      <SidebarHeader className="border-b border-[#2e2e2e]">
+    <Sidebar
+      className="bg-sidebar border-r border-sidebar-border"
+      {...props}
+    >
+      <SidebarHeader className="border-b border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gray-600 text-white">
+              <Link href="/dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-[var(--accent-active)] text-black">
                   <House className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-medium text-white">Sett</span>
-                  <span className="text-gray-400 text-xs">v0.0.2</span>
+                  <span className="font-medium text-sidebar-foreground">
+                    Sett
+                  </span>
+                  <span className="text-muted-foreground text-xs font-mono">
+                    v0.2.0
+                  </span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <SearchForm />
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            {data.navMain.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  className="text-gray-300 hover:bg-gray-700 hover:text-white"
-                >
-                  <a href={item.url}>{item.title}</a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            {navItems.map((item) => {
+              const isActive = pathname?.startsWith(item.url);
+              const Icon = item.icon;
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    className={cn(
+                      "px-3 py-1.5 transition-colors",
+                      isActive
+                        ? "bg-muted text-foreground border-l-2 border-[var(--accent-active)] rounded-l-none"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    <Link href={item.url}>
+                      <Icon className="size-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarRail className="bg-[#1a1a1a] hover:bg-[#2a2a2a]" />
+
+      <SidebarFooter className="border-t border-sidebar-border">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              className="px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-destructive transition-colors"
+            >
+              <LogOut className="size-4" />
+              <span>Cerrar sesión</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+
+      <SidebarRail />
     </Sidebar>
-  )
+  );
 }
