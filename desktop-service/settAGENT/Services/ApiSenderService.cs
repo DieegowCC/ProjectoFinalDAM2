@@ -131,28 +131,40 @@ namespace settAGENT.Services
         /// Si ya existe en el catálogo (GET /api/applications), reutiliza su id;
         /// si no, la crea (POST /api/applications) y devuelve el nuevo id.
         ///
+        /// El display_name se deriva del process_name (primera letra en mayúscula)
+        /// para que el dashboard muestre "Chrome" en vez del título completo de la
+        /// ventana, que puede contener rutas o nombres de archivo.
+        ///
         /// Esto evita duplicados cuando varios workers usan la misma app
         /// (todos comparten el mismo registro en la tabla applications).
         /// </summary>
-        public async Task<int?> GetOrCreateApplicationAsync(string processName, string windowTitle, CancellationToken ct)
+        public async Task<int?> GetOrCreateApplicationAsync(string processName, CancellationToken ct)
         {
             // 1. Pedir el catálogo y buscar si ya está
-            var getResponse = await _httpClient.GetAsync($"{_baseUrl}/api/applications", ct);
+            HttpResponseMessage getResponse = await _httpClient.GetAsync($"{_baseUrl}/api/applications", ct);
             if (getResponse.IsSuccessStatusCode)
             {
-                var json = await getResponse.Content.ReadAsStringAsync(ct);
-                var apps = JsonSerializer.Deserialize<List<JsonElement>>(json);
-                var existing = apps?.FirstOrDefault(a =>
-                    a.TryGetProperty("process_name", out var p) &&
+                string json = await getResponse.Content.ReadAsStringAsync(ct);
+                List<JsonElement>? apps = JsonSerializer.Deserialize<List<JsonElement>>(json);
+                JsonElement? existing = apps?.FirstOrDefault(a =>
+                    a.TryGetProperty("process_name", out JsonElement p) &&
                     p.GetString() == processName);
 
                 if (existing.HasValue && existing.Value.ValueKind == JsonValueKind.Object)
                     return existing.Value.GetProperty("id").GetInt32();
             }
 
-            // 2. Si no estaba, crearla
-            var body = new { process_name = processName, display_name = windowTitle };
-            var response = await PostAsync("api/applications", body, ct);
+            // 2. Si no estaba, crearla.
+            // display_name = process_name con la primera letra en mayúscula
+            // (p.ej. "chrome" → "Chrome", "Code" → "Code").
+            // NO usamos el título de la ventana porque cambia con cada archivo
+            // abierto y puede contener rutas largas.
+            string displayName = processName.Length > 0
+                ? char.ToUpper(processName[0]) + processName[1..]
+                : processName;
+
+            object body = new { process_name = processName, display_name = displayName };
+            JsonElement? response = await PostAsync("api/applications", body, ct);
             return response?.GetProperty("application").GetProperty("id").GetInt32();
         }
 
@@ -166,12 +178,12 @@ namespace settAGENT.Services
             try
             {
                 string json = JsonSerializer.Serialize(body);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync($"{_baseUrl}/{endpoint}", content, ct);
+                StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await _httpClient.PostAsync($"{_baseUrl}/{endpoint}", content, ct);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var responseJson = await response.Content.ReadAsStringAsync(ct);
+                    string responseJson = await response.Content.ReadAsStringAsync(ct);
                     return JsonSerializer.Deserialize<JsonElement>(responseJson);
                 }
 
@@ -189,7 +201,7 @@ namespace settAGENT.Services
         {
             try
             {
-                var response = await _httpClient.PutAsync($"{_baseUrl}/{endpoint}", null, ct);
+                HttpResponseMessage? response = await _httpClient.PutAsync($"{_baseUrl}/{endpoint}", null, ct);
                 if (!response.IsSuccessStatusCode)
                     _logger.LogWarning("API respondió con error {Code} en {Endpoint}", response.StatusCode, endpoint);
             }

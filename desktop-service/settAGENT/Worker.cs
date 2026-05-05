@@ -111,7 +111,7 @@ namespace settAGENT
                             await _apiSender.CloseAppActivityAsync(_currentActivityId.Value, stoppingToken);
 
                         // Asegurarnos de que la app está en el catálogo y abrir nueva actividad
-                        int? appId = await _apiSender.GetOrCreateApplicationAsync(processName, windowTitle, stoppingToken);
+                        int? appId = await _apiSender.GetOrCreateApplicationAsync(processName, stoppingToken);
                         _logger.LogInformation("[APP] GetOrCreate appId={AppId}", appId?.ToString() ?? "NULL — fallo al crear/obtener app");
 
                         if (appId.HasValue)
