@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pencil, Plus, Search, Trash2, RotateCcw } from "lucide-react";
+import { Pencil, Plus, Search, Trash2, RotateCcw, Download } from "lucide-react";
 import { ThemeToggle } from "@/components/dashboard/theme-toggle";
 import {
   WorkerFormSheet,
@@ -56,6 +56,28 @@ type Worker = {
 
 type LiveStatus = "Activo" | "Ausente" | "Inactivo";
 
+// Forma de cada fila que devuelve GET /api/report
+type ReportRow = {
+  worker_name:    string;
+  department:     string;
+  hostname:       string;
+  session_start:  string;
+  session_end:    string | null;
+  active_minutes: number;
+  idle_minutes:   number;
+  top_app:        string;
+};
+
+// Fecha de hoy en formato YYYY-MM-DD (valor inicial de los date pickers).
+// Está fuera del componente para que no se recalcule en cada render.
+const today = new Date().toISOString().split("T")[0];
+
+// Escapa un campo para CSV: lo envuelve en comillas y duplica las comillas
+// internas, por si el valor contiene comas o comillas.
+function escaparCsv(valor: string): string {
+  return `"${valor.replace(/"/g, '""')}"`;
+}
+
 export default function WorkersPage() {
   const router = useRouter();
   const [workers, setWorkers] = useState<Worker[]>([]);
@@ -66,6 +88,11 @@ export default function WorkersPage() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<WorkerFormData | null>(null);
+
+  // Estado del selector de rango de fechas para el informe
+  const [reportFrom, setReportFrom] = useState(today);
+  const [reportTo, setReportTo]     = useState(today);
+  const [downloading, setDownloading] = useState(false);
 
   // Pide la lista de workers + sus estados en vivo en paralelo y combina los
   // resultados. Lo guardamos en dos estados separados (workers y statuses)
@@ -162,6 +189,55 @@ export default function WorkersPage() {
       fetchWorkers();
     } catch (e) {
       setError(String(e));
+    }
+  };
+
+  // Llama al endpoint de informe y descarga el resultado como CSV
+  const handleDownloadReport = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    setDownloading(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/report?from=${reportFrom}&to=${reportTo}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const filas: ReportRow[] = await res.json();
+
+      // Construimos el CSV: cabecera + una línea por sesión
+      const cabecera = "Worker,Departamento,Hostname,Inicio sesión,Fin sesión,Minutos activos,Minutos inactivos,App principal";
+      const lineas = filas.map((f) => {
+        const inicio = new Date(f.session_start).toLocaleString("es-ES");
+        const fin    = f.session_end ? new Date(f.session_end).toLocaleString("es-ES") : "En curso";
+        return [
+          escaparCsv(f.worker_name),
+          escaparCsv(f.department),
+          escaparCsv(f.hostname),
+          escaparCsv(inicio),
+          escaparCsv(fin),
+          f.active_minutes,
+          f.idle_minutes,
+          escaparCsv(f.top_app),
+        ].join(",");
+      });
+
+      const csv  = [cabecera, ...lineas].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url  = URL.createObjectURL(blob);
+
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = `informe-actividad-${reportFrom}-${reportTo}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -377,6 +453,47 @@ export default function WorkersPage() {
                   ))}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Selector de rango de fechas para descargar el informe de actividad */}
+          <div className="rounded-[var(--radius)] border border-border bg-card px-5 py-4">
+            <div className="mb-3">
+              <h2 className="text-sm font-medium text-foreground">Informe de actividad</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Selecciona un rango de fechas para descargar el historial de sesiones en CSV.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-muted-foreground whitespace-nowrap">Desde</label>
+                <input
+                  type="date"
+                  value={reportFrom}
+                  max={reportTo}
+                  onChange={(e) => setReportFrom(e.target.value)}
+                  className="h-8 rounded-md border border-border bg-muted px-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-muted-foreground whitespace-nowrap">Hasta</label>
+                <input
+                  type="date"
+                  value={reportTo}
+                  min={reportFrom}
+                  onChange={(e) => setReportTo(e.target.value)}
+                  className="h-8 rounded-md border border-border bg-muted px-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+              </div>
+              <Button
+                size="sm"
+                onClick={handleDownloadReport}
+                disabled={downloading}
+                className="bg-foreground text-background hover:bg-foreground/90"
+              >
+                <Download className="size-4" />
+                {downloading ? "Generando…" : "Descargar CSV"}
+              </Button>
+            </div>
           </div>
         </div>
 
