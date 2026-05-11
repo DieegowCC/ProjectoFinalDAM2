@@ -42,6 +42,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("AllowFrontend");
+app.UseStaticFiles();
 app.UseAuthentication();    // siempre antes de UseAuthorization
 app.UseAuthorization();
 
@@ -110,13 +111,13 @@ void ConfigurarBaseDatos(DbContextOptionsBuilder options)
     options.UseNpgsql(connectionString);
 }
 
-// Permite que el frontend (Next.js en localhost:3000) llame a esta API
+// Permite que el frontend (Next.js en localhost:3000 o embedded) llame a esta API
 // enviando cookies/tokens. Sin esto, el navegador bloquearía las llamadas.
 void ConfigurarCors(CorsOptions options)
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5263")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
