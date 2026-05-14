@@ -31,8 +31,11 @@ public class ReportController : ControllerBase
         // DateTime.Parse devuelve Kind=Unspecified, que Npgsql (el driver de
         // PostgreSQL) rechaza al comparar con columnas timestamptz.
         // SpecifyKind le dice explícitamente que es UTC y el problema desaparece.
-        DateTime fromUtc = DateTime.SpecifyKind(DateTime.Parse(from).Date, DateTimeKind.Utc);
-        DateTime toUtc   = DateTime.SpecifyKind(DateTime.Parse(to).Date.AddDays(1), DateTimeKind.Utc);
+        if (!DateTime.TryParse(from, out DateTime fromParsed) || !DateTime.TryParse(to, out DateTime toParsed))
+            return BadRequest("Formato de fecha inválido. Use YYYY-MM-DD.");
+
+        DateTime fromUtc = DateTime.SpecifyKind(fromParsed.Date, DateTimeKind.Utc);
+        DateTime toUtc   = DateTime.SpecifyKind(toParsed.Date.AddDays(1), DateTimeKind.Utc);
 
         try
         {
