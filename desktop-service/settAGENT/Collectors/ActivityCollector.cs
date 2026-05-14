@@ -33,11 +33,10 @@ namespace settAGENT.Collectors
             info.cbSize = (uint)Marshal.SizeOf(info);
             GetLastInputInfo(ref info);
 
-            // Environment.TickCount = ms desde que arrancó Windows.
-            // info.dwTime = ms (en la misma escala) del último input.
-            // Restar nos da los ms que lleva idle.
-            uint idleTimeMs = (uint)Environment.TickCount - info.dwTime;
-            return idleTimeMs < TimeSpan.FromMinutes(thresholdMinutes).TotalMilliseconds;
+            // TickCount64 en vez de TickCount porque el de 32 bits se vuelve negativo
+            // tras unos 24 días encendido y la resta se va a la porra.
+            long idleTimeMs = Environment.TickCount64 - (long)info.dwTime;
+            return idleTimeMs >= 0 && idleTimeMs < TimeSpan.FromMinutes(thresholdMinutes).TotalMilliseconds;
         }
     }
 }
