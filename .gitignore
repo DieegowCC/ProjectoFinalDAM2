@@ -53,3 +53,11 @@ packages/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+
+# -----------------------------------------
+# 6. Compiled binaries y Builds
+# -----------------------------------------
+*.exe
+*.dll
+/out/
+.next/
