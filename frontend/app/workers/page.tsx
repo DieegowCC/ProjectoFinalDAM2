@@ -226,7 +226,9 @@ export default function WorkersPage() {
       });
 
       const csv  = [cabecera, ...lineas].join("\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      // BOM UTF-8 (﻿) necesario para que Excel interprete correctamente
+      // los caracteres acentuados en lugar de mostrarlos corruptos.
+      const blob = new Blob(["﻿", csv], { type: "text/csv;charset=utf-8;" });
       const url  = URL.createObjectURL(blob);
 
       const a    = document.createElement("a");
